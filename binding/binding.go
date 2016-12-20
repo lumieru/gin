@@ -9,12 +9,9 @@ import "net/http"
 const (
 	MIMEJSON              = "application/json"
 	MIMEHTML              = "text/html"
-	MIMEXML               = "application/xml"
-	MIMEXML2              = "text/xml"
 	MIMEPlain             = "text/plain"
 	MIMEPOSTForm          = "application/x-www-form-urlencoded"
 	MIMEMultipartPOSTForm = "multipart/form-data"
-	MIMEPROTOBUF          = "application/x-protobuf"
 )
 
 type Binding interface {
@@ -31,15 +28,13 @@ type StructValidator interface {
 	ValidateStruct(interface{}) error
 }
 
-var Validator StructValidator = &defaultValidator{}
+var Validator StructValidator = nil
 
 var (
 	JSON          = jsonBinding{}
-	XML           = xmlBinding{}
 	Form          = formBinding{}
 	FormPost      = formPostBinding{}
 	FormMultipart = formMultipartBinding{}
-	ProtoBuf      = protobufBinding{}
 )
 
 func Default(method, contentType string) Binding {
@@ -49,10 +44,6 @@ func Default(method, contentType string) Binding {
 		switch contentType {
 		case MIMEJSON:
 			return JSON
-		case MIMEXML, MIMEXML2:
-			return XML
-		case MIMEPROTOBUF:
-			return ProtoBuf
 		default: //case MIMEPOSTForm, MIMEMultipartPOSTForm:
 			return Form
 		}

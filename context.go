@@ -14,18 +14,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gin-gonic/gin/binding"
-	"github.com/gin-gonic/gin/render"
-	"github.com/manucorporat/sse"
-	"golang.org/x/net/context"
+	"github.com/lumieru/gin/binding"
+	"github.com/lumieru/gin/render"
+	"context"
 )
 
 // Content-Type MIME of the most common data formats
 const (
 	MIMEJSON              = binding.MIMEJSON
 	MIMEHTML              = binding.MIMEHTML
-	MIMEXML               = binding.MIMEXML
-	MIMEXML2              = binding.MIMEXML2
 	MIMEPlain             = binding.MIMEPlain
 	MIMEPOSTForm          = binding.MIMEPOSTForm
 	MIMEMultipartPOSTForm = binding.MIMEMultipartPOSTForm
@@ -454,16 +451,6 @@ func (c *Context) JSON(code int, obj interface{}) {
 	}
 }
 
-// XML serializes the given struct as XML into the response body.
-// It also sets the Content-Type as "application/xml".
-func (c *Context) XML(code int, obj interface{}) {
-	c.Render(code, render.XML{Data: obj})
-}
-
-// YAML serializes the given struct as YAML into the response body.
-func (c *Context) YAML(code int, obj interface{}) {
-	c.Render(code, render.YAML{Data: obj})
-}
 
 // String writes the given string into the response body.
 func (c *Context) String(code int, format string, values ...interface{}) {
@@ -493,14 +480,6 @@ func (c *Context) File(filepath string) {
 	http.ServeFile(c.Writer, c.Request, filepath)
 }
 
-// SSEvent writes a Server-Sent Event into the body stream.
-func (c *Context) SSEvent(name string, message interface{}) {
-	c.Render(-1, sse.Event{
-		Event: name,
-		Data:  message,
-	})
-}
-
 func (c *Context) Stream(step func(w io.Writer) bool) {
 	w := c.Writer
 	clientGone := w.CloseNotify()
@@ -527,7 +506,6 @@ type Negotiate struct {
 	HTMLName string
 	HTMLData interface{}
 	JSONData interface{}
-	XMLData  interface{}
 	Data     interface{}
 }
 
@@ -540,10 +518,6 @@ func (c *Context) Negotiate(code int, config Negotiate) {
 	case binding.MIMEHTML:
 		data := chooseData(config.HTMLData, config.Data)
 		c.HTML(code, config.HTMLName, data)
-
-	case binding.MIMEXML:
-		data := chooseData(config.XMLData, config.Data)
-		c.XML(code, data)
 
 	default:
 		c.AbortWithError(http.StatusNotAcceptable, errors.New("the accepted formats are not offered by the server"))

@@ -32,17 +32,11 @@ func TestBindingDefault(t *testing.T) {
 	assert.Equal(t, Default("POST", MIMEJSON), JSON)
 	assert.Equal(t, Default("PUT", MIMEJSON), JSON)
 
-	assert.Equal(t, Default("POST", MIMEXML), XML)
-	assert.Equal(t, Default("PUT", MIMEXML2), XML)
-
 	assert.Equal(t, Default("POST", MIMEPOSTForm), Form)
 	assert.Equal(t, Default("PUT", MIMEPOSTForm), Form)
 
 	assert.Equal(t, Default("POST", MIMEMultipartPOSTForm), Form)
 	assert.Equal(t, Default("PUT", MIMEMultipartPOSTForm), Form)
-
-	assert.Equal(t, Default("POST", MIMEPROTOBUF), ProtoBuf)
-	assert.Equal(t, Default("PUT", MIMEPROTOBUF), ProtoBuf)
 }
 
 func TestBindingJSON(t *testing.T) {
@@ -196,22 +190,6 @@ func testBodyBinding(t *testing.T, b Binding, name, path, badPath, body, badBody
 	assert.Error(t, err)
 }
 
-func testProtoBodyBinding(t *testing.T, b Binding, name, path, badPath, body, badBody string) {
-	assert.Equal(t, b.Name(), name)
-
-	obj := example.Test{}
-	req := requestWithBody("POST", path, body)
-	req.Header.Add("Content-Type", MIMEPROTOBUF)
-	err := b.Bind(req, &obj)
-	assert.NoError(t, err)
-	assert.Equal(t, *obj.Label, "yes")
-
-	obj = example.Test{}
-	req = requestWithBody("POST", badPath, badBody)
-	req.Header.Add("Content-Type", MIMEPROTOBUF)
-	err = ProtoBuf.Bind(req, &obj)
-	assert.Error(t, err)
-}
 
 func requestWithBody(method, path, body string) (req *http.Request) {
 	req, _ = http.NewRequest(method, path, bytes.NewBufferString(body))
